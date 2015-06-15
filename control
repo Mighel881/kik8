@@ -1,0 +1,10 @@
+Package: com.niro.Kik8
+Name: Kik8
+Depends: mobilesubstrate
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: kik8 brings the user the very best experience from fake camera to being 'hidden' v1.2 will have custom text color, and much more ;)
+Maintainer: niro
+Author: niro
+Section: Tweaks
+Homepage: http://Kik.me/notniro
