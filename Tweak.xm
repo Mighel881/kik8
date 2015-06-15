@@ -9,13 +9,13 @@ static inline BOOL GetPrefBool(NSString *key)
 
 - (BOOL)drRequested
 {
-  if(GetPrefBool(@"kDeliveredReceipts")) return NO;
+  if (GetPrefBool(@"kDeliveredReceipts")) return NO;
   return %orig;
 }
 
 - (BOOL)rrRequested
 {
-  if(GetPrefBool(@"kReadReceipts")) return NO;
+  if (GetPrefBool(@"kReadReceipts")) return NO;
   return %orig;
 }
 
