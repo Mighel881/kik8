@@ -2,63 +2,56 @@
 
 inline BOOL GetPrefBool(NSString *key)
 {
-return [[[NSDictionary dictionaryWithContentsOfFile:PLIST_PATH] valueForKey:key] boolValue];
+  return [[[NSDictionary dictionaryWithContentsOfFile:PLIST_PATH] valueForKey:key] boolValue];
 }
 
 %hook KikParsedMessage
 
--(BOOL)drRequested {
-if(GetPrefBool(@"kDeliveredReceipts")) {
-return NO;
-}
-return %orig;
+- (BOOL)drRequested
+{
+  if(GetPrefBool(@"kDeliveredReceipts")) return NO;
+  return %orig;
 }
 
--(BOOL)rrRequested {
-if(GetPrefBool(@"kReadReceipts")) {
-return NO;
-}
-return %orig;
+- (BOOL)rrRequested
+{
+  if(GetPrefBool(@"kReadReceipts")) return NO;
+  return %orig;
 }
 
 %end
-
 
 %hook KikAPIMessage
 
--(BOOL)disableForwarding {
-return NO;
+- (BOOL)disableForwarding
+{
+  return NO;
 }
 
--(void)setAppID:(NSString *)argument {
-if(GetPrefBool(@"kFakeCamera")) {
-argument = [[NSString alloc] initWithString:@"com.kik.ext.camera"];
-}
-return %orig;
+- (void)setAppID:(NSString *)argument
+{
+  if (GetPrefBool(@"kFakeCamera")) argument = [[NSString alloc] initWithString:@"com.kik.ext.camera"];
+  return %orig;
 }
 
 %end
-
 
 %hook KikMessage
 
--(BOOL)isMarkedDeleted {
-if(GetPrefBool(@"kDelete")) {
-return YES;
-}
-return %orig;
+- (BOOL)isMarkedDeleted
+{
+  if (GetPrefBool(@"kDelete")) return YES;
+  return %orig;
 }
 
 %end
 
-
 %hook KikChat
 
--(BOOL)amTyping {
-if(GetPrefBool(@"kTyping")) {
-return NO;
-}
-return %orig;
+- (BOOL)amTyping
+{
+  if (GetPrefBool(@"kTyping")) return NO;
+  return %orig;
 }
 
 %end
