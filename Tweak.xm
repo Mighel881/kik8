@@ -30,7 +30,7 @@ static inline BOOL GetPrefBool(NSString *key)
 
 - (void)setAppID:(NSString *)argument
 {
-  if (GetPrefBool(@"kFakeCamera")) argument = [[NSString alloc] initWithString:@"com.kik.ext.camera"];
+  if (GetPrefBool(@"kFakeCamera")) argument = @"com.kik.ext.camera";
   return %orig;
 }
 
