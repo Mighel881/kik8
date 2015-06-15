@@ -1,22 +1,22 @@
 #define PLIST_PATH @"/var/mobile/Library/Preferences/com.niro.Kik8.plist"
- 
-inline bool GetPrefBool(NSString *key)
+
+inline BOOL GetPrefBool(NSString *key)
 {
 return [[[NSDictionary dictionaryWithContentsOfFile:PLIST_PATH] valueForKey:key] boolValue];
 }
 
 %hook KikParsedMessage
 
--(bool)drRequested {
+-(BOOL)drRequested {
 if(GetPrefBool(@"kDeliveredReceipts")) {
-return FALSE;
+return NO;
 }
 return %orig;
 }
 
--(bool)rrRequested {
+-(BOOL)rrRequested {
 if(GetPrefBool(@"kReadReceipts")) {
-return FALSE;
+return NO;
 }
 return %orig;
 }
@@ -26,8 +26,8 @@ return %orig;
 
 %hook KikAPIMessage
 
--(bool)disableForwarding {
-return FALSE;
+-(BOOL)disableForwarding {
+return NO;
 }
 
 -(void)setAppID:(NSString *)argument {
@@ -42,9 +42,9 @@ return %orig;
 
 %hook KikMessage
 
--(bool)isMarkedDeleted {
+-(BOOL)isMarkedDeleted {
 if(GetPrefBool(@"kDelete")) {
-return TRUE;
+return YES;
 }
 return %orig;
 }
@@ -54,9 +54,9 @@ return %orig;
 
 %hook KikChat
 
--(bool)amTyping {
+-(BOOL)amTyping {
 if(GetPrefBool(@"kTyping")) {
-return FALSE;
+return NO;
 }
 return %orig;
 }
