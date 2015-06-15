@@ -1,8 +1,9 @@
-#define PLIST_PATH @"/var/mobile/Library/Preferences/com.niro.Kik8.plist"
+
+NSString *const KEPlistPath = @"/var/mobile/Library/Preferences/com.niro.Kik8.plist";
 
 static inline BOOL GetPrefBool(NSString *key)
 {
-  return [[[NSDictionary dictionaryWithContentsOfFile:PLIST_PATH] valueForKey:key] boolValue];
+  return [[[NSDictionary dictionaryWithContentsOfFile:KEPlistPath] valueForKey:key] boolValue];
 }
 
 %hook KikParsedMessage

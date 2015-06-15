@@ -1,5 +1,5 @@
 ARCHS = armv7 arm64
-include theos/makefiles/common.mk
+include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = Kik8
 Kik8_FILES = Kik8.mm
