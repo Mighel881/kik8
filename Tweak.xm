@@ -1,6 +1,6 @@
 #define PLIST_PATH @"/var/mobile/Library/Preferences/com.niro.Kik8.plist"
 
-inline BOOL GetPrefBool(NSString *key)
+static inline BOOL GetPrefBool(NSString *key)
 {
   return [[[NSDictionary dictionaryWithContentsOfFile:PLIST_PATH] valueForKey:key] boolValue];
 }
