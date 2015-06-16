@@ -3,7 +3,7 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = Kik8
 Kik8_FILES = Tweak.xm
-Kik8_FRAMEWORKS = UIKit
+Kik8_FRAMEWORKS = UIKit CoreGraphics
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
