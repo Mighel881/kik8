@@ -83,7 +83,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (BOOL)drRequested
 {
-  if ([getOptionForKey(@"kDeliveredReceipts", self._realUsername ? self._realUsername : @"$global") boolValue]) return NO;
+  if ([((NSNumber *)getOptionForKey(@"kDeliveredReceipts", self._realUsername ? self._realUsername : @"$global")) boolValue]) return NO;
   return %orig;
 }
 
@@ -100,7 +100,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (BOOL)rrRequested
 {
-  if ([getOptionForKey(@"kReadReceipts", self._realUsername ? self._realUsername : @"$global") boolValue]) return NO;
+  if ([((NSNumber *)getOptionForKey(@"kReadReceipts", self._realUsername ? self._realUsername : @"$global")) boolValue]) return NO;
   return %orig;
 }
 
@@ -141,7 +141,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (BOOL)amTyping
 {
-  if ([getOptionForKey(@"kTyping", self.user.username ? self.user.username : @"$global") boolValue]) return NO;
+  if ([((NSNumber *)getOptionForKey(@"kTyping", self.user.username ? self.user.username : @"$global")) boolValue]) return NO;
   return %orig;
 }
 
@@ -195,6 +195,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 UIColor *const kDarkColor = [UIColor colorWithRed:0.157  green:0.157  blue:0.157 alpha:1];
 UIColor *const kLightColor = [UIColor colorWithRed:0.945  green:0.945  blue:0.945 alpha:1];
+UIColor *const kMidColor = [UIColor colorWithRed:0.283  green:0.283  blue:0.283 alpha:1];
 
 @interface UIColor (Helpers)
 + (id)borderGreyColor;
@@ -232,11 +233,13 @@ static inline UIColor *bubbleColor()
 {
   %orig;
 }
+
 - (void)updateMessageStatus
 {
   %orig;
   self.status.image = colorImageWithColor(self.status.image, bubbleColor());
 }
+
 - (void)updateMessageLabel
 {
   %orig;
@@ -254,6 +257,32 @@ static inline UIColor *bubbleColor()
   self.message.textColor = kLightColor;
 
   self.status.image = colorImageWithColor(self.status.image, bubbleColor());
+}
+
+- (void)setSeparatorLine:(UIView *)view
+{
+  view.layer.backgroundColor = kMidColor.CGColor;
+  %orig;
+}
+
+- (UIView *)separatorLine
+{
+  UIView *view = (UIView *)%orig;
+  view.layer.backgroundColor = kMidColor.CGColor;
+  return view;
+}
+
+- (void)setTopSeparatorLine:(UIView *)view
+{
+  view.layer.backgroundColor = kMidColor.CGColor;
+  %orig;
+}
+
+- (UIView *)topSeparatorLine
+{
+  UIView *view = (UIView *)%orig;
+  view.layer.backgroundColor = kMidColor.CGColor;
+  return view;
 }
 
 %end
@@ -293,7 +322,7 @@ static inline UIColor *bubbleColor()
 {
   UIImageView *o = (UIImageView *)%orig;
 
-  o.image = colorImageWithColor(o.image, kLightColor);
+  o.image = colorImageWithColor(o.image, bubbleColor());
 
   return o;
 }
@@ -321,25 +350,25 @@ static inline UIColor *bubbleColor()
 - (id)addOnePxLeftBorder
 {
   UIView *original = (UIView *)%orig;
-  original.backgroundColor = kDarkColor;
+  original.backgroundColor = kMidColor;
   return original;
 }
 - (id)addOnePxRightBorder
 {
   UIView *original = (UIView *)%orig;
-  original.backgroundColor = kDarkColor;
+  original.backgroundColor = kMidColor;
   return original;
 }
 - (id)addOnePxBottomBorder
 {
   UIView *original = (UIView *)%orig;
-  original.backgroundColor = kDarkColor;
+  original.backgroundColor = kMidColor;
   return original;
 }
 - (id)addOnePxTopBorder
 {
   UIView *original = (UIView *)%orig;
-  original.backgroundColor = kDarkColor;
+  original.backgroundColor = kMidColor;
   return original;
 }
 
@@ -353,7 +382,7 @@ static inline UIColor *bubbleColor()
 - (void)viewDidLoad
 {
   %orig;
-  self.tableView.separatorColor = kDarkColor;
+  self.tableView.separatorColor = kMidColor;
   self.tableView.backgroundColor = kDarkColor;
 }
 
@@ -367,21 +396,6 @@ static inline UIColor *bubbleColor()
   self.barTintColor = kDarkColor;
   self.tintColor = bubbleColor();
   self.titleTextAttributes = @{ NSForegroundColorAttributeName : kLightColor};
-}
-
-%end
-
-@interface UITableViewCellContentView : UIView
-@property (nonatomic, retain) UIView *mask;
-@end
-
-%hook UITableViewCellContentView
-
-- (void)layoutSubviews
-{
-  %orig;
-
-  self.mask.hidden = YES;
 }
 
 %end
@@ -406,6 +420,99 @@ static inline UIColor *bubbleColor()
 {
   color = kDarkColor;
   %orig;
+}
+
+%end
+
+@interface HPGrowingTextView : UITextView
+@end
+
+%hook HPGrowingTextView
+
+- (void)setTextColor:(UIColor *)textColor
+{
+  textColor = [UIColor whiteColor];
+  %orig;
+}
+
+- (UIColor *)textColor
+{
+  return [UIColor whiteColor];
+}
+
+- (void)layoutSubviews
+{
+  %orig;
+  [self setTextColor:[UIColor whiteColor]];
+}
+
+%end
+
+@interface TwoLayerButton : UIButton
+@property (nonatomic, retain) UIImageView *topImageView;
+@end
+
+@interface MediaContentTabs : UIView
+@property (nonatomic, retain) UIButton *mediaButton;
+@end
+
+%hook MediaContentTabs
+
+- (UIButton *)mediaButton
+{
+  TwoLayerButton *original = (TwoLayerButton *)%orig;
+  original.imageView.image = colorImageWithColor(original.imageView.image, bubbleColor());
+  return original;
+}
+
+- (void)showButton:(UIButton *)button withAnimation:(_Bool)arg2 andDelay:(double)arg3
+{
+  [button setImage:colorImageWithColor([button imageForState:UIControlStateNormal], bubbleColor()) forState:UIControlStateNormal];
+  [button setImage:colorImageWithColor([button imageForState:UIControlStateHighlighted], bubbleColor()) forState:UIControlStateHighlighted];
+  [button setImage:colorImageWithColor([button imageForState:UIControlStateSelected], bubbleColor()) forState:UIControlStateSelected];
+  [button setImage:colorImageWithColor([button imageForState:UIControlStateDisabled], bubbleColor()) forState:UIControlStateDisabled];
+  %orig;
+}
+
+%end
+
+@interface MediaContentSendMessage
+@property(readonly, nonatomic) UIButton *sendButton; // @synthesize sendButton=_sendButton;
+@property(readonly, nonatomic) UIButton *smileyButton; // @synthesize smileyButton=_smileyButton;
+@end
+
+%hook MediaContentSendMessage
+
+- (UIButton *)smileyButton
+{
+  UIButton *smileyButton = (UIButton *)%orig;
+  [smileyButton setImage:colorImageWithColor([smileyButton imageForState:UIControlStateNormal], bubbleColor()) forState:UIControlStateNormal];
+  [smileyButton setImage:colorImageWithColor([smileyButton imageForState:UIControlStateHighlighted], bubbleColor()) forState:UIControlStateHighlighted];
+  [smileyButton setImage:colorImageWithColor([smileyButton imageForState:UIControlStateDisabled], bubbleColor()) forState:UIControlStateDisabled];
+  return smileyButton;
+}
+
+- (UIButton *)sendButton
+{
+  UIButton *sendButton = (UIButton *)%orig;
+  [sendButton setImage:colorImageWithColor([sendButton imageForState:UIControlStateNormal], bubbleColor()) forState:UIControlStateNormal];
+  [sendButton setImage:colorImageWithColor([sendButton imageForState:UIControlStateHighlighted], bubbleColor()) forState:UIControlStateHighlighted];
+  [sendButton setImage:colorImageWithColor([sendButton imageForState:UIControlStateDisabled], bubbleColor()) forState:UIControlStateDisabled];
+  return sendButton;
+}
+
+%end
+
+@interface HighlightedUIButton : UIButton
+- (UIImage *)image;
+@end
+
+%hook HighlightedUIButton
+
+- (void)didMoveToSuperview
+{
+  %orig;
+  [self setImage:colorImageWithColor([self imageForState:UIControlStateNormal], bubbleColor()) forState:UIControlStateNormal];
 }
 
 %end
