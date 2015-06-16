@@ -253,13 +253,17 @@ static NSObject *getOptionForKey(NSString *key, NSString *username)
   %orig;
   UIViewController *con = self.navigationController.previousViewController;
 
-  self.title = @"Kik8";
-
   if ([con isKindOfClass:%c(ProfileChatInfoViewController)])
   {
     ProfileChatInfoViewController *profVC = (ProfileChatInfoViewController *)con;
     self.username = profVC.user.username;
   }
+}
+
+- (void)viewDidLoad
+{
+  %orig;
+  self.title = @"Kik8";
 }
 
 %new
