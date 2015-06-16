@@ -289,6 +289,15 @@ static inline UIColor *bubbleColor()
   return o;
 }
 
+- (UIImageView *)stateIcon
+{
+  UIImageView *o = (UIImageView *)%orig;
+
+  o.image = colorImageWithColor(o.image, kLightColor);
+
+  return o;
+}
+
 %end
 
 @interface MediaBarViewController : UIViewController
