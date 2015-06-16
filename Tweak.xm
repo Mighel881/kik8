@@ -33,6 +33,36 @@ static NSObject *getOptionForKey(NSString *key, NSString *username)
  return [userP objectForKey:key];
 }
 
+static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
+{
+
+   UIGraphicsBeginImageContextWithOptions(image.size, NO, image.scale);
+   CGContextRef context = UIGraphicsGetCurrentContext();
+   CGContextTranslateCTM(context, 0, image.size.height);
+   CGContextScaleCTM(context, 1.0, -1.0);
+
+   CGContextSetBlendMode(context, kCGBlendModeNormal);
+   CGRect rect = CGRectMake(0, 0, image.size.width, image.size.height);
+   //CGContextDrawImage(context, rect, img.CGImage);
+
+   // Create gradient
+   NSArray *colors = [NSArray arrayWithObjects:(id)color.CGColor, (id)color.CGColor, nil];
+   CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+   CGGradientRef gradient = CGGradientCreateWithColors(space, (__bridge CFArrayRef)colors, NULL);
+
+   // Apply gradient
+   CGContextClipToMask(context, rect, image.CGImage);
+   CGContextDrawLinearGradient(context, gradient, CGPointMake(0,0), CGPointMake(0, image.size.height), 0);
+   UIImage *gradientImage = UIGraphicsGetImageFromCurrentImageContext();
+   UIGraphicsEndImageContext();
+
+   CGGradientRelease(gradient);
+   CGColorSpaceRelease(space);
+
+   return gradientImage;
+//    return image;
+}
+
 @interface KikUser : NSObject
 - (NSString *)username;
 - (NSString *)groupTag;
@@ -160,6 +190,242 @@ static NSObject *getOptionForKey(NSString *key, NSString *username)
 }
 
 %end
+
+// Nightmode Color Stuff ^-^
+
+UIColor *const kDarkColor = [UIColor colorWithRed:0.157  green:0.157  blue:0.157 alpha:1];
+UIColor *const kLightColor = [UIColor colorWithRed:0.945  green:0.945  blue:0.945 alpha:1];
+
+@interface UIColor (Helpers)
++ (id)borderGreyColor;
++ (id)iOS7GreySelectionColor;
++ (id)iOS7BlueColor;
++ (id)colorFromHexString:(id)arg1;
++ (id)colorWithHexValue:(unsigned int)arg1;
+@end
+
+@interface BubbleColors : NSObject
++ (NSString *)colorHexFromColorEnum:(long long)enumv;
+@end
+
+@interface ConversationListCell : UITableViewCell
+@property(retain, nonatomic) UILabel *message; // @synthesize message=_message;
+@property(retain, nonatomic) UILabel *date; // @synthesize date=_date;
+@property(retain, nonatomic) UILabel *title; // @synthesize title=_title;
+@property(retain, nonatomic) UIImageView *status;
+@end
+
+static inline UIColor *bubbleColor()
+{
+  return [UIColor colorFromHexString:[%c(BubbleColors) colorHexFromColorEnum:[[NSUserDefaults standardUserDefaults] doubleForKey:@"bubbleColorEnum"]]];
+}
+
+%hook ConversationListCell
+
+- (void)setBackgroundColor:(UIColor *)color
+{
+  color = kDarkColor;
+  %orig;
+}
+
+- (void)updateMessageIcon
+{
+  %orig;
+}
+- (void)updateMessageStatus
+{
+  %orig;
+  self.status.image = colorImageWithColor(self.status.image, bubbleColor());
+}
+- (void)updateMessageLabel
+{
+  %orig;
+  self.title.textColor = kLightColor;
+  self.date.textColor = kLightColor;
+  self.message.textColor = kLightColor;
+}
+
+- (void)layoutSubviews
+{
+  %orig;
+
+  self.title.textColor = kLightColor;
+  self.date.textColor = kLightColor;
+  self.message.textColor = kLightColor;
+
+  self.status.image = colorImageWithColor(self.status.image, bubbleColor());
+}
+
+%end
+
+@interface MessageListTableviewController : UITableViewController
+@end
+
+%hook MessageListTableviewController
+
+- (void)viewDidLoad
+{
+  %orig;
+  self.tableView.backgroundColor = kDarkColor;
+}
+
+%end
+
+@interface MessageCell : UITableViewCell
+@property (nonatomic, assign) UIImageView *bubbleMask;
+@end
+
+%hook MessageCell
+
+- (UIImageView *)bubbleMask
+{
+  UIImageView *o = (UIImageView *)%orig;
+  // o.image = colorImageWithColor(o.image, kDarkColor);
+
+  UIImage *theImage = o.image;
+  UIEdgeInsets caps = [theImage capInsets];
+  o.image = [[[colorImageWithColor(o.image, kDarkColor) imageWithAlignmentRectInsets:[theImage alignmentRectInsets]] imageWithRenderingMode:[theImage renderingMode]] resizableImageWithCapInsets:caps];
+
+  return o;
+}
+
+%end
+
+@interface MediaBarViewController : UIViewController
+
+@end
+
+%hook MediaBarViewController
+
+- (UIView *)mediaBar
+{
+  UIView *_mediaBar = (UIView *)%orig;
+  _mediaBar.backgroundColor = kDarkColor;
+
+  return _mediaBar;
+}
+
+%end
+
+%hook UIView
+
+- (id)addOnePxLeftBorder
+{
+  UIView *original = (UIView *)%orig;
+  original.backgroundColor = kDarkColor;
+  return original;
+}
+- (id)addOnePxRightBorder
+{
+  UIView *original = (UIView *)%orig;
+  original.backgroundColor = kDarkColor;
+  return original;
+}
+- (id)addOnePxBottomBorder
+{
+  UIView *original = (UIView *)%orig;
+  original.backgroundColor = kDarkColor;
+  return original;
+}
+- (id)addOnePxTopBorder
+{
+  UIView *original = (UIView *)%orig;
+  original.backgroundColor = kDarkColor;
+  return original;
+}
+
+%end
+
+@interface TalkedToConversationListViewController : UITableViewController
+@end
+
+%hook TalkedToConversationListViewController
+
+- (void)viewDidLoad
+{
+  %orig;
+  self.tableView.separatorColor = kDarkColor;
+  self.tableView.backgroundColor = kDarkColor;
+}
+
+%end
+
+%hook UINavigationBar
+
+- (void)layoutSubviews
+{
+  %orig;
+  self.barTintColor = kDarkColor;
+  self.tintColor = bubbleColor();
+  self.titleTextAttributes = @{ NSForegroundColorAttributeName : kLightColor};
+}
+
+%end
+
+@interface UITableViewCellContentView : UIView
+@property (nonatomic, retain) UIView *mask;
+@end
+
+%hook UITableViewCellContentView
+
+- (void)layoutSubviews
+{
+  %orig;
+
+  self.mask.hidden = YES;
+}
+
+%end
+
+@interface NewPeopleFooterButton : UIButton
+@end
+
+%hook NewPeopleFooterButton
+
+- (void)layoutSubviews
+{
+  %orig;
+  self.backgroundColor = kDarkColor;
+}
+
+- (UIColor *)backgroundColor
+{
+  return kDarkColor;
+}
+
+- (void)setBackgroundColor:(UIColor *)color
+{
+  color = kDarkColor;
+  %orig;
+}
+
+%end
+
+%hook UIStatusBarNewUIStyleAttributes
+
+- (id)initWithRequest:(id)style backgroundColor:(id)backgroundColor foregroundColor:(id)foregroundColor
+{
+	//  arg3 = newForegroundColor;
+
+
+	foregroundColor = bubbleColor();
+
+	self = %orig;
+	return self;
+}
+
+%end
+
+%hook UIColor
+
++ (UIColor *)iOS7BlueColor
+{
+    return bubbleColor();
+}
+
+%end
+
+// Settings
 
 @interface SettingsOptionToggle : NSObject
 {
