@@ -440,6 +440,12 @@ static inline UIColor *bubbleColor()
   return [UIColor whiteColor];
 }
 
+- (void)textViewDidBeginEditing:(id)arg1
+{
+  %orig;
+  [self setTextColor:[UIColor whiteColor]];
+}
+
 - (void)layoutSubviews
 {
   %orig;
