@@ -1,1 +1,4 @@
 *.deb
+obj
+.theos
+theos
