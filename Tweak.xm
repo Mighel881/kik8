@@ -192,7 +192,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 %end
 
 // Nightmode Color Stuff ^-^
-
+%group NightMode
 UIColor *const kDarkColor = [UIColor colorWithRed:0.157  green:0.157  blue:0.157 alpha:1];
 UIColor *const kLightColor = [UIColor colorWithRed:0.945  green:0.945  blue:0.945 alpha:1];
 UIColor *const kMidColor = [UIColor colorWithRed:0.283  green:0.283  blue:0.283 alpha:1];
@@ -547,6 +547,8 @@ static inline UIColor *bubbleColor()
 
 %end
 
+%end
+
 // Settings
 
 @interface SettingsOptionToggle : NSObject
@@ -736,6 +738,10 @@ static inline UIColor *bubbleColor()
   if (![self.username isEqualToString:@"$global"])
   [mutableNewArr insertObject:[%c(SettingsOptionToggle) optionWithTitle:@"Disable Custom Settings For This User" iconImage:nil optionKey:@"kUserDisabled" KEManager:self] atIndex:0];
 
+  if ([self.username isEqualToString:@"$global"])
+  [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Night/Dark Mode" iconImage:nil optionKey:@"kEnableNightMode" KEManager:self]];
+
+
   // [newArr addObject:[[%c(SettingsOptionSubPane) alloc] initWithTitle:@"Kik8 Options" iconImage:nil subPaneClass:%c(KESettingsViewController)]];
 
   return (NSArray *)mutableNewArr;
@@ -751,3 +757,11 @@ static inline UIColor *bubbleColor()
 }
 
 %end
+
+%ctor {
+  if (((NSNumber *)getOptionForKey(@"kEnableNightMode", @"$global")).boolValue)
+  %init(NightMode);
+
+  %init(_ungrouped)
+
+}
