@@ -99,6 +99,54 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %end
 
+%hook PBJVision
+
+  -(double)capturedVideoSeconds
+{
+    if (((NSNumber *)getOptionForKey(@"kUnlimitedVideo", @"$global")).boolValue) return 0;
+  return %orig;
+}
+
+%end
+
+%hook UITextInputTraits
+
+  -(int)keyboardAppearance
+{
+    if (((NSNumber *)getOptionForKey(@"kEnableNightMode", @"$global")).boolValue) return 1;
+  return %orig;
+}
+
+%end
+
+%hook ProfilePictureImageView
+
+  -(BOOL)useRawImage
+{
+    if (((NSNumber *)getOptionForKey(@"kSquareTheme", @"$global")).boolValue) return YES;
+  return %orig;
+}
+  -(BOOL)useHighResImageWhenAvailable
+{
+    if (((NSNumber *)getOptionForKey(@"kSquareTheme", @"$global")).boolValue) return YES;
+  return %orig;
+}
+
+  %end
+
+  %hook NetworkNotifier
+
+  -(BOOL)isNetworkUnavailable
+{
+    return NO;
+}
+  -(BOOL)isConnected
+{
+    return YES;
+}
+
+%end
+
 %hook KikAPIMessage
 
 - (BOOL)disableForwarding
@@ -772,6 +820,8 @@ static inline UIColor *bubbleColor()
   if ([self.username isEqualToString:@"$global"]) // global only
   {
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Night/Dark Mode" iconImage:nil optionKey:@"kEnableNightMode" KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Unlimited Video Recording Time" iconImage:nil optionKey:@"kUnlimitedVideo" KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Square Theme" iconImage:nil optionKey:@"kSquareTheme" KEManager:self]];
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Disable Smiley Icons" iconImage:nil optionKey:@"kDisableSmiley" KEManager:self]];
   }
 
