@@ -731,7 +731,8 @@ static inline UIColor *bubbleColor()
   @[
   [%c(SettingsOptionToggle) optionWithTitle:@"Disable Deliver Receipts" iconImage:nil optionKey:@"kDeliveredReceipts" KEManager:self],
   [%c(SettingsOptionToggle) optionWithTitle:@"Disable Read Receipts" iconImage:nil optionKey:@"kReadReceipts" KEManager:self],
-  [%c(SettingsOptionToggle) optionWithTitle:@"Disable is typing..." iconImage:nil optionKey:@"kTyping" KEManager:self]
+  [%c(SettingsOptionToggle) optionWithTitle:@"Disable is typing..." iconImage:nil optionKey:@"kTyping" KEManager:self],
+    [%c(SettingsOptionToggle) optionWithTitle:@"Disable is typing..." iconImage:nil optionKey:@"kTyping" KEManager:self]
   ];
 
   NSMutableArray *mutableNewArr = [NSMutableArray arrayWithArray:newArr];
@@ -766,3 +767,13 @@ static inline UIColor *bubbleColor()
   %init(_ungrouped)
 
 }
+
+%hook SmileyTranslator
+
+- (BOOL)excludeSmiley:(id)arg1 withPrefix:(id)arg2 withSuffix(id)arg3
+{
+  if (GetPrefBool(@"kSmiley")) return YES;
+  return %orig(arg1, arg2, arg3);
+}
+
+%end
