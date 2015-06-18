@@ -95,6 +95,29 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 - (XMPPJID *)userJid;
 @end
 #import <substrate.h>
+
+%hook SmileyStorageNetworkDiskProvider
+
+- (id)loadSmileysFromFileName:(NSString *)fname
+{
+  if (((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  fname = @"kik8smileys";
+  
+  return %orig;
+}
+
+- (id)initWithFileName:(id)fname andXDataManager:(id)arg2 andUserDefaults:(id)arg3 andNetwork:(id)arg4 notifications:(id)arg5
+{
+  if (((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  fname = @"kik8smileys";
+
+  self = %orig;
+  return self;
+}
+
+%end
+
+
 %hook KikParsedMessage
 
 - (BOOL)drRequested
@@ -928,6 +951,7 @@ static inline UIColor *bubbleColor()
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Unlimited Video Recording Time" iconImage:nil optionKey:@"kUnlimitedVideo" KEManager:self]];
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Square Theme" iconImage:nil optionKey:@"kSquareTheme" KEManager:self]];
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Disable Smiley Icons" iconImage:nil optionKey:@"kDisableSmiley" KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Unlock All Smileys" iconImage:nil optionKey:@"kUnlockSmiley" KEManager:self]];
   }
 
   // [newArr addObject:[[%c(SettingsOptionSubPane) alloc] initWithTitle:@"Kik8 Options" iconImage:nil subPaneClass:%c(KESettingsViewController)]];
@@ -946,10 +970,16 @@ static inline UIColor *bubbleColor()
 
 %end
 
+@interface KikFileUtils : NSObject
++ (NSString *)dirPath:(NSString *)dir;
+@end
+
 %ctor {
   if (((NSNumber *)getOptionForKey(@"kEnableNightMode", kGlobalUser)).boolValue)
   %init(NightMode);
 
   %init(_ungrouped)
+
+  [[NSFileManager defaultManager] copyItemAtPath:@"/Library/Application Support/kik8/smileys" toPath:[[%c(KikFileUtils) dirPath:@"smiley_storage"] stringByAppendingPathComponent:@"kik8smileys"] error:nil];
 
 }
