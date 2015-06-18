@@ -1,13 +1,6 @@
 #import <UIKit/UIKit.h>
 
-
-NSString *const KEPlistPath = @"/var/mobile/Library/Preferences/com.niro.Kik8.plist";
 UIColor *const KEKikLightColor = [UIColor colorWithRed:0.937 green:0.937 blue:0.957 alpha:1];
-
-static inline BOOL GetPrefBool(NSString *key)
-{
-  return [[[NSDictionary dictionaryWithContentsOfFile:KEPlistPath] valueForKey:key] boolValue];
-}
 
 static NSObject *getOptionForKey(NSString *key, NSString *username)
 {
@@ -115,7 +108,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (void)setAppID:(NSString *)argument
 {
-  if (GetPrefBool(@"kFakeCamera")) argument = @"com.kik.ext.camera";
+  if (((NSNumber *)getOptionForKey(@"kFakeCamera", @"$global")).boolValue) argument = @"com.kik.ext.camera";
   return %orig;
 }
 
@@ -142,7 +135,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (BOOL)isMarkedDeleted
 {
-  if (GetPrefBool(@"kDelete")) return YES;
+  if (((NSNumber *)getOptionForKey(@"kDelete", @"$global")).boolValue) return YES;
   return %orig;
 }
 
@@ -159,7 +152,15 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %end
 
+%hook SmileyTranslator
 
+- (BOOL)excludeSmiley:(id)arg1 withPrefix:(id)arg2 withSuffix:(id)arg3
+{
+  if (((NSNumber *)getOptionForKey(@"kSmiley", @"$global")).boolValue) return YES;
+  return %orig;
+}
+
+%end
 
 @interface KikChat : UIViewController
 - (KikUser *)user;
@@ -795,13 +796,3 @@ static inline UIColor *bubbleColor()
   %init(_ungrouped)
 
 }
-
-%hook SmileyTranslator
-
-- (BOOL)excludeSmiley:(id)arg1 withPrefix:(id)arg2 withSuffix(id)arg3
-{
-  if (GetPrefBool(@"kSmiley")) return YES;
-  return %orig(arg1, arg2, arg3);
-}
-
-%end
