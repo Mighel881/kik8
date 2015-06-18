@@ -1,59 +1,80 @@
 #import <UIKit/UIKit.h>
 
 UIColor *const KEKikLightColor = [UIColor colorWithRed:0.937 green:0.937 blue:0.957 alpha:1];
+static inline UIColor *bubbleColor();
 
 static NSObject *getOptionForKey(NSString *key, NSString *username)
 {
   // code from @iMokhles
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
- NSString *documentsDirectory = [paths objectAtIndex:0];
- NSString *filePath = [NSString stringWithFormat:@"%@/%@", documentsDirectory, @"com.niro.kik8.plist"];
+  NSString *documentsDirectory = [paths objectAtIndex:0];
+  NSString *filePath = [NSString stringWithFormat:@"%@/%@", documentsDirectory, @"com.niro.kik8.plist"];
 
- NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:filePath];
+  NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:filePath];
 
- if (!dict) dict = [NSDictionary dictionary];
+  if (!dict) dict = [NSDictionary dictionary];
 
- NSDictionary *userP = [dict objectForKey:username];
- if (!userP) userP = [NSDictionary dictionary];
+  NSDictionary *userP = [dict objectForKey:username];
+  if (!userP) userP = [NSDictionary dictionary];
 
- if ([[userP objectForKey:@"kUserDisabled"] boolValue] && ![key isEqualToString:@"kUserDisabled"])
- {
-   username = @"$global";
-   userP = [dict objectForKey:username];
-   if (!userP) userP = [NSDictionary dictionary];
- }
+  if ([[userP objectForKey:@"kUserDisabled"] boolValue] && ![key isEqualToString:@"kUserDisabled"])
+  {
+    username = @"$global";
+    userP = [dict objectForKey:username];
+    if (!userP) userP = [NSDictionary dictionary];
+  }
 
- return [userP objectForKey:key];
+  return [userP objectForKey:key];
+}
+
+static void saveOptionForKey(NSObject *obj, NSString *key, NSString *username)
+{
+  // code from @iMokhles
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+  NSString *documentsDirectory = [paths objectAtIndex:0];
+  NSString *filePath = [NSString stringWithFormat:@"%@/%@", documentsDirectory, @"com.niro.kik8.plist"];
+
+  NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:filePath];
+
+  if (!dict) dict = [NSMutableDictionary dictionary];
+
+  NSMutableDictionary *userP = [dict objectForKey:username];
+  if (!userP) userP = [NSMutableDictionary dictionary];
+
+  [userP setObject:obj forKey:key];
+  [dict setObject:userP forKey:username];
+
+  [dict writeToFile:filePath atomically:YES];
 }
 
 static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 {
 
-   UIGraphicsBeginImageContextWithOptions(image.size, NO, image.scale);
-   CGContextRef context = UIGraphicsGetCurrentContext();
-   CGContextTranslateCTM(context, 0, image.size.height);
-   CGContextScaleCTM(context, 1.0, -1.0);
+  UIGraphicsBeginImageContextWithOptions(image.size, NO, image.scale);
+  CGContextRef context = UIGraphicsGetCurrentContext();
+  CGContextTranslateCTM(context, 0, image.size.height);
+  CGContextScaleCTM(context, 1.0, -1.0);
 
-   CGContextSetBlendMode(context, kCGBlendModeNormal);
-   CGRect rect = CGRectMake(0, 0, image.size.width, image.size.height);
-   //CGContextDrawImage(context, rect, img.CGImage);
+  CGContextSetBlendMode(context, kCGBlendModeNormal);
+  CGRect rect = CGRectMake(0, 0, image.size.width, image.size.height);
+  //CGContextDrawImage(context, rect, img.CGImage);
 
-   // Create gradient
-   NSArray *colors = [NSArray arrayWithObjects:(id)color.CGColor, (id)color.CGColor, nil];
-   CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
-   CGGradientRef gradient = CGGradientCreateWithColors(space, (__bridge CFArrayRef)colors, NULL);
+  // Create gradient
+  NSArray *colors = [NSArray arrayWithObjects:(id)color.CGColor, (id)color.CGColor, nil];
+  CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+  CGGradientRef gradient = CGGradientCreateWithColors(space, (__bridge CFArrayRef)colors, NULL);
 
-   // Apply gradient
-   CGContextClipToMask(context, rect, image.CGImage);
-   CGContextDrawLinearGradient(context, gradient, CGPointMake(0,0), CGPointMake(0, image.size.height), 0);
-   UIImage *gradientImage = UIGraphicsGetImageFromCurrentImageContext();
-   UIGraphicsEndImageContext();
+  // Apply gradient
+  CGContextClipToMask(context, rect, image.CGImage);
+  CGContextDrawLinearGradient(context, gradient, CGPointMake(0,0), CGPointMake(0, image.size.height), 0);
+  UIImage *gradientImage = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
 
-   CGGradientRelease(gradient);
-   CGColorSpaceRelease(space);
+  CGGradientRelease(gradient);
+  CGColorSpaceRelease(space);
 
-   return gradientImage;
-//    return image;
+  return gradientImage;
+  //    return image;
 }
 
 @interface KikUser : NSObject
@@ -101,9 +122,9 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %hook PBJVision
 
-  -(double)capturedVideoSeconds
+-(double)capturedVideoSeconds
 {
-    if (((NSNumber *)getOptionForKey(@"kUnlimitedVideo", @"$global")).boolValue) return 0;
+  if (((NSNumber *)getOptionForKey(@"kUnlimitedVideo", @"$global")).boolValue) return 0;
   return %orig;
 }
 
@@ -111,9 +132,9 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %hook UITextInputTraits
 
-  -(int)keyboardAppearance
+-(int)keyboardAppearance
 {
-    if (((NSNumber *)getOptionForKey(@"kEnableNightMode", @"$global")).boolValue) return 1;
+  if (((NSNumber *)getOptionForKey(@"kEnableNightMode", @"$global")).boolValue) return 1;
   return %orig;
 }
 
@@ -121,28 +142,28 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %hook ProfilePictureImageView
 
-  -(BOOL)useRawImage
+-(BOOL)useRawImage
 {
-    if (((NSNumber *)getOptionForKey(@"kSquareTheme", @"$global")).boolValue) return YES;
+  if (((NSNumber *)getOptionForKey(@"kSquareTheme", @"$global")).boolValue) return YES;
   return %orig;
 }
-  -(BOOL)useHighResImageWhenAvailable
+-(BOOL)useHighResImageWhenAvailable
 {
-    if (((NSNumber *)getOptionForKey(@"kSquareTheme", @"$global")).boolValue) return YES;
+  if (((NSNumber *)getOptionForKey(@"kSquareTheme", @"$global")).boolValue) return YES;
   return %orig;
 }
 
-  %end
+%end
 
-  %hook NetworkNotifier
+%hook NetworkNotifier
 
-  -(BOOL)isNetworkUnavailable
+-(BOOL)isNetworkUnavailable
 {
-    return NO;
+  return NO;
 }
-  -(BOOL)isConnected
+-(BOOL)isConnected
 {
-    return YES;
+  return YES;
 }
 
 %end
@@ -156,8 +177,106 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (void)setAppID:(NSString *)argument
 {
-  if (((NSNumber *)getOptionForKey(@"kFakeCamera", @"$global")).boolValue) argument = @"com.kik.ext.camera";
+  if (((NSNumber *)getOptionForKey(@"kFakeCamera", @"$global")).boolValue)
+  {
+    if ([argument isEqualToString:@"com.kik.ext.gallery"]) argument = @"com.kik.ext.camera";
+    if ([argument isEqualToString:@"com.kik.ext.video-gallery"]) argument = @"com.kik.ext.video-camera";
+  }
   return %orig;
+}
+
+%end
+
+@interface MediaBarViewController : UIViewController
+@property(retain, nonatomic) UIView *mediaBar;
+@property(retain, nonatomic) UISwitch *_toggle;
+@end
+
+%hook MediaBarViewController
+
+- (void)viewDidLayoutSubviews
+{
+  %orig;
+  if (!self._toggle)
+  {
+    // fake camera switch
+    self._toggle = [[UISwitch alloc] initWithFrame:CGRectMake((self.mediaBar.frame.size.width-51)-50, 5, 51, 31)];
+    [self._toggle addTarget:self action:@selector(camToggleValueChanged:) forControlEvents:UIControlEventTouchUpInside];
+    self._toggle.onTintColor = bubbleColor();
+  }
+}
+
+%new
+- (void)camToggleValueChanged:(UISwitch *)sender
+{
+  saveOptionForKey(@(sender.isOn), @"kFakeCamera", @"$global");
+}
+
+- (void)mediaContentSizeButtonTapped:(id)arg1
+{
+  %orig;
+  // full screen statusbar paddding
+  if (self._toggle.frame.origin.y == 5)
+    self._toggle.frame = CGRectMake((self.mediaBar.frame.size.width-51)-50, 25, 51, 31);
+  else
+    self._toggle.frame = CGRectMake((self.mediaBar.frame.size.width-51)-50, 5, 51, 31);
+}
+
+- (void)openMediaBarTabContent:(id)arg1
+{
+  %orig;
+  if (!self._toggle.superview)
+  [self.mediaBar addSubview:self._toggle];
+  
+  self._toggle.frame = CGRectMake((self.mediaBar.frame.size.width-51)-50, 5, 51, 31);
+}
+
+- (void)openMediaBarTabContent:(id)arg1 withCompletionCallback:(void *)arg2
+{
+  %orig;
+  if (!self._toggle.superview)
+  [self.mediaBar addSubview:self._toggle];
+  
+  self._toggle.frame = CGRectMake((self.mediaBar.frame.size.width-51)-50, 5, 51, 31);
+}
+
+- (void)closeMediaBarTabContentWithMode:(int)arg1 animated:(_Bool)arg2
+{
+  if (self._toggle)
+  [self._toggle removeFromSuperview];
+  %orig;
+}
+
+- (void)closeMediaBarTabContentWithMode:(int)arg1 animated:(_Bool)arg2 withCompletionCallback:(void *)arg3
+{
+  if (self._toggle)
+  [self._toggle removeFromSuperview];
+  %orig;
+}
+
+- (void)animateWithContent:(id)arg1
+{
+  if (self._toggle)
+  [self._toggle removeFromSuperview];
+  %orig;
+}
+
+%new
+- (UISwitch *)_toggle
+{
+  return objc_getAssociatedObject(self, @selector(_toggle));
+}
+
+%new
+- (void)set_toggle:(UISwitch *)value
+{
+  objc_setAssociatedObject(self, @selector(_toggle), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (void)dealloc
+{
+  [self._toggle release];
+  %orig;
 }
 
 %end
@@ -408,10 +527,6 @@ static inline UIColor *bubbleColor()
 
 %end
 
-@interface MediaBarViewController : UIViewController
-
-@end
-
 %hook MediaBarViewController
 
 - (UIView *)mediaBar
@@ -606,13 +721,13 @@ static inline UIColor *bubbleColor()
 
 - (id)initWithRequest:(id)style backgroundColor:(id)backgroundColor foregroundColor:(id)foregroundColor
 {
-	//  arg3 = newForegroundColor;
+  //  arg3 = newForegroundColor;
 
 
-	foregroundColor = bubbleColor();
+  foregroundColor = bubbleColor();
 
-	self = %orig;
-	return self;
+  self = %orig;
+  return self;
 }
 
 %end
@@ -621,7 +736,7 @@ static inline UIColor *bubbleColor()
 
 + (UIColor *)iOS7BlueColor
 {
-    return bubbleColor();
+  return bubbleColor();
 }
 
 %end
@@ -632,9 +747,9 @@ static inline UIColor *bubbleColor()
 
 @interface SettingsOptionToggle : NSObject
 {
-    UIImage *_iconImage;
-    NSString *_title;
-    UISwitch *_toggle;
+  UIImage *_iconImage;
+  NSString *_title;
+  UISwitch *_toggle;
 }
 
 @property(retain, nonatomic) UISwitch *toggle; // @synthesize toggle=_toggle;
@@ -671,8 +786,8 @@ static inline UIColor *bubbleColor()
 
 - (void)toggleValueChanged:(id)arg1
 {
- BOOL saveVal = self.toggle.isOn;
- [self.KEManager saveOption:@(saveVal) forKey:self.optionKey];
+  BOOL saveVal = self.toggle.isOn;
+  [self.KEManager saveOption:@(saveVal) forKey:self.optionKey];
 }
 
 %new
@@ -684,7 +799,7 @@ static inline UIColor *bubbleColor()
 %new
 - (void)setOptionKey:(NSString *)value
 {
-	objc_setAssociatedObject(self, @selector(optionKey), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+  objc_setAssociatedObject(self, @selector(optionKey), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 %new
@@ -696,7 +811,7 @@ static inline UIColor *bubbleColor()
 %new
 - (void)setKEManager:(KESettingsViewController *)value
 {
-	objc_setAssociatedObject(self, @selector(KEManager), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+  objc_setAssociatedObject(self, @selector(KEManager), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 %new
@@ -738,60 +853,25 @@ static inline UIColor *bubbleColor()
 %new
 - (NSString *)username
 {
-	return objc_getAssociatedObject(self, @selector(username));
+  return objc_getAssociatedObject(self, @selector(username));
 }
 
 %new
 - (void)setUsername:(NSString *)value
 {
-	objc_setAssociatedObject(self, @selector(username), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+  objc_setAssociatedObject(self, @selector(username), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 %new
 - (void)saveOption:(NSObject *)obj forKey:(NSString *)key
 {
-  // code from @iMokhles
-  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
- NSString *documentsDirectory = [paths objectAtIndex:0];
- NSString *filePath = [NSString stringWithFormat:@"%@/%@", documentsDirectory, @"com.niro.kik8.plist"];
-
- NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithContentsOfFile:filePath];
-
- if (!dict) dict = [NSMutableDictionary dictionary];
-
- NSMutableDictionary *userP = [dict objectForKey:self.username];
- if (!userP) userP = [NSMutableDictionary dictionary];
-
- [userP setObject:obj forKey:key];
- [dict setObject:userP forKey:self.username];
-
- [dict writeToFile:filePath atomically:YES];
+  saveOptionForKey(obj, key, self.username);
 }
 
 %new
 - (NSObject *)getOptionForKey:(NSString *)key
 {
-  NSString *username = self.username;
-  // code from @iMokhles
-  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
- NSString *documentsDirectory = [paths objectAtIndex:0];
- NSString *filePath = [NSString stringWithFormat:@"%@/%@", documentsDirectory, @"com.niro.kik8.plist"];
-
- NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:filePath];
-
- if (!dict) dict = [NSDictionary dictionary];
-
- NSDictionary *userP = [dict objectForKey:username];
- if (!userP) userP = [NSDictionary dictionary];
-
- if ([[userP objectForKey:@"kUserDisabled"] boolValue] && ![key isEqualToString:@"kUserDisabled"])
- {
-   username = @"$global";
-   userP = [dict objectForKey:username];
-   if (!userP) userP = [NSDictionary dictionary];
- }
-
- return [userP objectForKey:key];
+  return getOptionForKey(key, self.username);
 }
 
 - (id)initWithCore:(id)core
