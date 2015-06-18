@@ -49,6 +49,17 @@ static void saveOptionForKey(NSObject *obj, NSString *key, NSString *username)
   [dict writeToFile:filePath atomically:YES];
 }
 
+@interface KikFileUtils : NSObject
++ (NSString *)dirPath:(NSString *)dir;
+@end
+
+static void copySmileys()
+{
+  NSString *k8smileypath = [[%c(KikFileUtils) dirPath:@"smiley_storage"] stringByAppendingPathComponent:@"kik8smileys"];
+  [[NSFileManager defaultManager] removeItemAtPath:k8smileypath error:nil];
+  [[NSFileManager defaultManager] copyItemAtPath:@"/Library/Application Support/kik8/smileys" toPath:k8smileypath error:nil];
+}
+
 static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 {
 
@@ -113,6 +124,12 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 }
 
 - (void)reset
+{
+  if (!((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  %orig;
+}
+
+- (void)deleteSmileyWithIdentifier:(id)arg1
 {
   if (!((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
   %orig;
@@ -988,16 +1005,10 @@ static inline UIColor *bubbleColor()
 
 %end
 
-@interface KikFileUtils : NSObject
-+ (NSString *)dirPath:(NSString *)dir;
-@end
-
 %ctor {
   if (((NSNumber *)getOptionForKey(@"kEnableNightMode", kGlobalUser)).boolValue)
   %init(NightMode);
 
   %init(_ungrouped)
-
-  [[NSFileManager defaultManager] copyItemAtPath:@"/Library/Application Support/kik8/smileys" toPath:[[%c(KikFileUtils) dirPath:@"smiley_storage"] stringByAppendingPathComponent:@"kik8smileys"] error:nil];
-
+  copySmileys();
 }
