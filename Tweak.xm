@@ -114,22 +114,38 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %end
 
-%hook HybridSmileyLabel
+@interface KikMessage : NSObject
+@property(nonatomic) BOOL needsCellHeightRecalc;
+@property(nonatomic) BOOL hasContent;
+@property(nonatomic, retain) NSString *body;
+@end
 
-- (void)setText:(NSString *)body
+@interface MessageCellDel : NSObject
+- (void)deleteCell:(id)cell;
+@end
+
+@interface MessageCell : UITableViewCell
+@property(retain, nonatomic) KikMessage *message; // @synthesize message=_message;
+@property (nonatomic, assign) UIImageView *bubbleMask;
+@property (nonatomic, retain) MessageCellDel *delegate;
+@end
+
+@interface MessageCellRenderer : NSObject
+@property (nonatomic, retain) MessageCell *cell;
+@end
+
+@interface InOutMessageRenderer : MessageCellRenderer
+@end
+
+%hook InOutMessageRenderer
+
+- (_Bool)shouldDisplayMessage:(id)arg1 // anti lag
 {
-  if (body.length > 1024)
-  {
-    body = @"** SPAM DETECTED **";
-  }
-  %orig;
+  if (self.cell.message.body.length >= 2048) return NO;
+  else return %orig;
 }
 
 %end
-
-@interface KikMessage : NSObject
-@property(nonatomic) _Bool needsCellHeightRecalc;
-@end
 
 %hook KikMessage
 
@@ -139,24 +155,13 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
   return %orig;
 }
 
-// anti lag
-- (void)setBody:(NSString *)body
-{
-  if (body.length > 1024)
-  {
-    body = @"** SPAM DETECTED **";
-  }
-  self.needsCellHeightRecalc = YES;
-  %orig;
-}
-
 %end
 
 %hook SmileyTranslator
 
 - (BOOL)excludeSmiley:(id)arg1 withPrefix:(id)arg2 withSuffix:(id)arg3
 {
-  if (((NSNumber *)getOptionForKey(@"kSmiley", @"$global")).boolValue) return YES;
+  if (((NSNumber *)getOptionForKey(@"kDisableSmiley", @"$global")).boolValue) return YES;
   return %orig;
 }
 
@@ -329,10 +334,6 @@ static inline UIColor *bubbleColor()
 }
 
 %end
-
-@interface MessageCell : UITableViewCell
-@property (nonatomic, assign) UIImageView *bubbleMask;
-@end
 
 %hook MessageCell
 
@@ -760,18 +761,19 @@ static inline UIColor *bubbleColor()
   @[
   [%c(SettingsOptionToggle) optionWithTitle:@"Disable Deliver Receipts" iconImage:nil optionKey:@"kDeliveredReceipts" KEManager:self],
   [%c(SettingsOptionToggle) optionWithTitle:@"Disable Read Receipts" iconImage:nil optionKey:@"kReadReceipts" KEManager:self],
-  [%c(SettingsOptionToggle) optionWithTitle:@"Disable is typing..." iconImage:nil optionKey:@"kTyping" KEManager:self],
-    [%c(SettingsOptionToggle) optionWithTitle:@"Disable is typing..." iconImage:nil optionKey:@"kTyping" KEManager:self]
+  [%c(SettingsOptionToggle) optionWithTitle:@"Disable is typing..." iconImage:nil optionKey:@"kTyping" KEManager:self]
   ];
 
   NSMutableArray *mutableNewArr = [NSMutableArray arrayWithArray:newArr];
 
-  if (![self.username isEqualToString:@"$global"])
+  if (![self.username isEqualToString:@"$global"]) // not global
   [mutableNewArr insertObject:[%c(SettingsOptionToggle) optionWithTitle:@"Disable Custom Settings For This User" iconImage:nil optionKey:@"kUserDisabled" KEManager:self] atIndex:0];
 
-  if ([self.username isEqualToString:@"$global"])
-  [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Night/Dark Mode" iconImage:nil optionKey:@"kEnableNightMode" KEManager:self]];
-
+  if ([self.username isEqualToString:@"$global"]) // global only
+  {
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Night/Dark Mode" iconImage:nil optionKey:@"kEnableNightMode" KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Disable Smiley Icons" iconImage:nil optionKey:@"kDisableSmiley" KEManager:self]];
+  }
 
   // [newArr addObject:[[%c(SettingsOptionSubPane) alloc] initWithTitle:@"Kik8 Options" iconImage:nil subPaneClass:%c(KESettingsViewController)]];
 
