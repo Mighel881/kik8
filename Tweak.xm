@@ -170,6 +170,11 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %end
 
+@interface KikAPIMessage : NSObject
+@property (nonatomic, retain) NSString *appID;
+@property (nonatomic, retain) NSString *appName;
+@end
+
 %hook KikAPIMessage
 
 - (BOOL)disableForwarding
@@ -182,9 +187,26 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
   if (((NSNumber *)getOptionForKey(@"kFakeCamera", kGlobalUser)).boolValue)
   {
     if ([argument isEqualToString:@"com.kik.ext.gallery"]) argument = @"com.kik.ext.camera";
-    if ([argument isEqualToString:@"com.kik.ext.video-gallery"]) argument = @"com.kik.ext.video-camera";
+    if ([argument isEqualToString:@"com.kik.ext.video-gallery"])
+    {
+      argument = @"com.kik.ext.video-camera";
+      self.appName = @"Video";
+    }
   }
-  return %orig;
+
+  %orig;
+}
+
+- (void)setAppName:(NSString *)name
+{
+
+  if (((NSNumber *)getOptionForKey(@"kFakeCamera", kGlobalUser)).boolValue)
+  {
+    if ([self.appID isEqualToString:@"com.kik.ext.video-camera"] || [self.appID isEqualToString:@"com.kik.ext.video-gallery"])
+    name = @"Video";
+  }
+
+  %orig;
 }
 
 %end
@@ -205,6 +227,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
     self._toggle = [[UISwitch alloc] initWithFrame:CGRectMake((self.mediaBar.frame.size.width-51)-50, 5, 51, 31)];
     [self._toggle addTarget:self action:@selector(camToggleValueChanged:) forControlEvents:UIControlEventTouchUpInside];
     self._toggle.onTintColor = bubbleColor();
+    [self._toggle setOn:((NSNumber *)getOptionForKey(@"kFakeCamera", kGlobalUser)).boolValue animated:NO];
   }
 }
 
