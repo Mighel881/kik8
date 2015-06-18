@@ -165,7 +165,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 {
   NSArray *arr = %orig;
   NSMutableArray *newArr = [NSMutableArray arrayWithArray:arr];
-  UIImage *icon = [UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Kik8.bundle/Kik8.png"];
+  UIImage *icon = [UIImage imageWithContentsOfFile:@"/Library/Application Support/kik8/Kik8.png"];
   [newArr addObject:[[%c(SettingsOptionSubPane) alloc] initWithTitle:@"Kik8 Global Options" iconImage:icon subPaneClass:%c(KESettingsViewController)]];
 
   return newArr;
