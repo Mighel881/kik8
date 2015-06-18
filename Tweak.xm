@@ -102,8 +102,26 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 {
   if (((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
   fname = @"kik8smileys";
-  
+
   return %orig;
+}
+
+- (void)clearStoredSmileyData
+{
+  if (!((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  %orig;
+}
+
+- (void)reset
+{
+  if (!((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  %orig;
+}
+
+- (void)clearSmileysWithFileName:(id)arg1
+{
+  if (!((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  %orig;
 }
 
 - (id)initWithFileName:(id)fname andXDataManager:(id)arg2 andUserDefaults:(id)arg3 andNetwork:(id)arg4 notifications:(id)arg5
