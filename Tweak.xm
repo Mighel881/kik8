@@ -4,6 +4,17 @@ UIColor *const KEKikLightColor = [UIColor colorWithRed:0.937 green:0.937 blue:0.
 static inline UIColor *bubbleColor();
 
 NSString *const kGlobalUser = @"$global";
+NSString *const kEnableNightMode = @"$kik8_enable_nightmode";
+NSString *const kDisableSmiley = @"$kik8_disable_smiley";
+NSString *const kUserDisabled = @"$kik8_user_disabled";
+NSString *const kUnlockSmiley = @"$kik8_unlock_smiley";
+NSString *const kDeliveredReceipts = @"$kik8_delivered_receipts";
+NSString *const kReadReceipts = @"$kik8_read_receipts";
+NSString *const kUnlimitedVideo = @"$kik8_unlimited_video";
+NSString *const kSquareTheme = @"$kik8_square_theme";
+NSString *const kFakeCamera = @"$kik8_fake_camera";
+NSString *const kDelete = @"$kik8_delete";
+NSString *const kTyping = @"$kik8_typing";
 
 static NSObject *getOptionForKey(NSString *key, NSString *username)
 {
@@ -19,7 +30,7 @@ static NSObject *getOptionForKey(NSString *key, NSString *username)
   NSDictionary *userP = [dict objectForKey:username];
   if (!userP) userP = [NSDictionary dictionary];
 
-  if ([[userP objectForKey:@"kUserDisabled"] boolValue] && ![key isEqualToString:@"kUserDisabled"])
+  if ([[userP objectForKey:kUserDisabled] boolValue] && ![key isEqualToString:kUserDisabled])
   {
     username = kGlobalUser;
     userP = [dict objectForKey:username];
@@ -111,7 +122,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (id)loadSmileysFromFileName:(NSString *)fname
 {
-  if (((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  if (((NSNumber *)getOptionForKey(kUnlockSmiley, kGlobalUser)).boolValue)
   fname = @"kik8smileys";
 
   return %orig;
@@ -119,31 +130,31 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (void)clearStoredSmileyData
 {
-  if (!((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  if (!((NSNumber *)getOptionForKey(kUnlockSmiley, kGlobalUser)).boolValue)
   %orig;
 }
 
 - (void)reset
 {
-  if (!((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  if (!((NSNumber *)getOptionForKey(kUnlockSmiley, kGlobalUser)).boolValue)
   %orig;
 }
 
 - (void)deleteSmileyWithIdentifier:(id)arg1
 {
-  if (!((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  if (!((NSNumber *)getOptionForKey(kUnlockSmiley, kGlobalUser)).boolValue)
   %orig;
 }
 
 - (void)clearSmileysWithFileName:(id)arg1
 {
-  if (!((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  if (!((NSNumber *)getOptionForKey(kUnlockSmiley, kGlobalUser)).boolValue)
   %orig;
 }
 
 - (id)initWithFileName:(id)fname andXDataManager:(id)arg2 andUserDefaults:(id)arg3 andNetwork:(id)arg4 notifications:(id)arg5
 {
-  if (((NSNumber *)getOptionForKey(@"kUnlockSmiley", kGlobalUser)).boolValue)
+  if (((NSNumber *)getOptionForKey(kUnlockSmiley, kGlobalUser)).boolValue)
   fname = @"kik8smileys";
 
   self = %orig;
@@ -157,7 +168,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (BOOL)drRequested
 {
-  if ([((NSNumber *)getOptionForKey(@"kDeliveredReceipts", self._realUsername ? self._realUsername : kGlobalUser)) boolValue]) return NO;
+  if ([((NSNumber *)getOptionForKey(kDeliveredReceipts, self._realUsername ? self._realUsername : kGlobalUser)) boolValue]) return NO;
   return %orig;
 }
 
@@ -174,7 +185,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (BOOL)rrRequested
 {
-  if ([((NSNumber *)getOptionForKey(@"kReadReceipts", self._realUsername ? self._realUsername : kGlobalUser)) boolValue]) return NO;
+  if ([((NSNumber *)getOptionForKey(kReadReceipts, self._realUsername ? self._realUsername : kGlobalUser)) boolValue]) return NO;
   return %orig;
 }
 
@@ -182,9 +193,9 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %hook PBJVision
 
--(double)capturedVideoSeconds
+- (double)capturedVideoSeconds
 {
-  if (((NSNumber *)getOptionForKey(@"kUnlimitedVideo", kGlobalUser)).boolValue) return 0;
+  if (((NSNumber *)getOptionForKey(kUnlimitedVideo, kGlobalUser)).boolValue) return 0;
   return %orig;
 }
 
@@ -192,9 +203,9 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %hook UITextInputTraits
 
--(int)keyboardAppearance
+- (int)keyboardAppearance
 {
-  if (((NSNumber *)getOptionForKey(@"kEnableNightMode", kGlobalUser)).boolValue) return 1;
+  if (((NSNumber *)getOptionForKey(kEnableNightMode, kGlobalUser)).boolValue) return 1;
   return %orig;
 }
 
@@ -202,14 +213,14 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %hook ProfilePictureImageView
 
--(BOOL)useRawImage
+- (BOOL)useRawImage
 {
-  if (((NSNumber *)getOptionForKey(@"kSquareTheme", kGlobalUser)).boolValue) return YES;
+  if (((NSNumber *)getOptionForKey(kSquareTheme, kGlobalUser)).boolValue) return YES;
   return %orig;
 }
--(BOOL)useHighResImageWhenAvailable
+- (BOOL)useHighResImageWhenAvailable
 {
-  if (((NSNumber *)getOptionForKey(@"kSquareTheme", kGlobalUser)).boolValue) return YES;
+  if (((NSNumber *)getOptionForKey(kSquareTheme, kGlobalUser)).boolValue) return YES;
   return %orig;
 }
 
@@ -217,11 +228,11 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %hook NetworkNotifier
 
--(BOOL)isNetworkUnavailable
+- (BOOL)isNetworkUnavailable
 {
   return NO;
 }
--(BOOL)isConnected
+- (BOOL)isConnected
 {
   return YES;
 }
@@ -242,7 +253,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (void)setAppID:(NSString *)argument
 {
-  if (((NSNumber *)getOptionForKey(@"kFakeCamera", kGlobalUser)).boolValue)
+  if (((NSNumber *)getOptionForKey(kFakeCamera, kGlobalUser)).boolValue)
   {
     if ([argument isEqualToString:@"com.kik.ext.gallery"]) argument = @"com.kik.ext.camera";
     if ([argument isEqualToString:@"com.kik.ext.video-gallery"])
@@ -258,7 +269,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 - (void)setAppName:(NSString *)name
 {
 
-  if (((NSNumber *)getOptionForKey(@"kFakeCamera", kGlobalUser)).boolValue)
+  if (((NSNumber *)getOptionForKey(kFakeCamera, kGlobalUser)).boolValue)
   {
     if ([self.appID isEqualToString:@"com.kik.ext.video-camera"] || [self.appID isEqualToString:@"com.kik.ext.video-gallery"])
     name = @"Video";
@@ -285,14 +296,14 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
     self._toggle = [[UISwitch alloc] initWithFrame:CGRectMake((self.mediaBar.frame.size.width-51)-50, 5, 51, 31)];
     [self._toggle addTarget:self action:@selector(camToggleValueChanged:) forControlEvents:UIControlEventTouchUpInside];
     self._toggle.onTintColor = bubbleColor();
-    [self._toggle setOn:((NSNumber *)getOptionForKey(@"kFakeCamera", kGlobalUser)).boolValue animated:NO];
+    [self._toggle setOn:((NSNumber *)getOptionForKey(kFakeCamera, kGlobalUser)).boolValue animated:NO];
   }
 }
 
 %new
 - (void)camToggleValueChanged:(UISwitch *)sender
 {
-  saveOptionForKey(@(sender.isOn), @"kFakeCamera", kGlobalUser);
+  saveOptionForKey(@(sender.isOn), kFakeCamera, kGlobalUser);
 }
 
 - (void)mediaContentSizeButtonTapped:(id)arg1
@@ -401,7 +412,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (BOOL)isMarkedDeleted
 {
-  if (((NSNumber *)getOptionForKey(@"kDelete", kGlobalUser)).boolValue) return YES;
+  if (((NSNumber *)getOptionForKey(kDelete, kGlobalUser)).boolValue) return YES;
   return %orig;
 }
 
@@ -411,7 +422,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (BOOL)excludeSmiley:(id)arg1 withPrefix:(id)arg2 withSuffix:(id)arg3
 {
-  if (((NSNumber *)getOptionForKey(@"kDisableSmiley", kGlobalUser)).boolValue) return YES;
+  if (((NSNumber *)getOptionForKey(kDisableSmiley, kGlobalUser)).boolValue) return YES;
   return %orig;
 }
 
@@ -425,7 +436,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 - (BOOL)amTyping
 {
-  if ([((NSNumber *)getOptionForKey(@"kTyping", self.user.username ? self.user.username : kGlobalUser)) boolValue]) return NO;
+  if ([((NSNumber *)getOptionForKey(kTyping, self.user.username ? self.user.username : kGlobalUser)) boolValue]) return NO;
   return %orig;
 }
 
@@ -469,7 +480,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
   NSMutableArray *newArr = [NSMutableArray arrayWithArray:arr];
 
   if (self.user.username)
-  [newArr addObject:[[%c(SettingsOptionSubPane) alloc] initWithTitle:[NSString stringWithFormat:@"Kik8 %@ Options", self.user.username] iconImage:nil subPaneClass:%c(KESettingsViewController)]];
+  [newArr addObject:[[%c(SettingsOptionSubPane) alloc] initWithTitle:[NSString stringWithFormat:@"Kik8 (%@) Options", self.user.username] iconImage:nil subPaneClass:%c(KESettingsViewController)]];
 
   return newArr;
 }
@@ -970,23 +981,23 @@ static inline UIColor *bubbleColor()
 {
   NSArray *newArr =
   @[
-  [%c(SettingsOptionToggle) optionWithTitle:@"Disable Deliver Receipts" iconImage:nil optionKey:@"kDeliveredReceipts" KEManager:self],
-  [%c(SettingsOptionToggle) optionWithTitle:@"Disable Read Receipts" iconImage:nil optionKey:@"kReadReceipts" KEManager:self],
-  [%c(SettingsOptionToggle) optionWithTitle:@"Disable is typing..." iconImage:nil optionKey:@"kTyping" KEManager:self]
+  [%c(SettingsOptionToggle) optionWithTitle:@"Disable Deliver Receipts" iconImage:nil optionKey:kDeliveredReceipts KEManager:self],
+  [%c(SettingsOptionToggle) optionWithTitle:@"Disable Read Receipts" iconImage:nil optionKey:kReadReceipts KEManager:self],
+  [%c(SettingsOptionToggle) optionWithTitle:@"Disable is typing..." iconImage:nil optionKey:kTyping KEManager:self]
   ];
 
   NSMutableArray *mutableNewArr = [NSMutableArray arrayWithArray:newArr];
 
   if (![self.username isEqualToString:kGlobalUser]) // not global
-  [mutableNewArr insertObject:[%c(SettingsOptionToggle) optionWithTitle:@"Disable Custom Settings For This User" iconImage:nil optionKey:@"kUserDisabled" KEManager:self] atIndex:0];
+  [mutableNewArr insertObject:[%c(SettingsOptionToggle) optionWithTitle:@"Disable Custom Settings For This User" iconImage:nil optionKey:kUserDisabled KEManager:self] atIndex:0];
 
   if ([self.username isEqualToString:kGlobalUser]) // global only
   {
-    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Night/Dark Mode" iconImage:nil optionKey:@"kEnableNightMode" KEManager:self]];
-    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Unlimited Video Recording Time" iconImage:nil optionKey:@"kUnlimitedVideo" KEManager:self]];
-    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Square Theme" iconImage:nil optionKey:@"kSquareTheme" KEManager:self]];
-    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Disable Smiley Icons" iconImage:nil optionKey:@"kDisableSmiley" KEManager:self]];
-    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Unlock All Smileys" iconImage:nil optionKey:@"kUnlockSmiley" KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Night/Dark Mode" iconImage:nil optionKey:kEnableNightMode KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Unlimited Video Recording Time" iconImage:nil optionKey:kUnlimitedVideo KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Square Theme" iconImage:nil optionKey:kSquareTheme KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Disable Smiley Icons" iconImage:nil optionKey:kDisableSmiley KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Unlock All Smileys" iconImage:nil optionKey:kUnlockSmiley KEManager:self]];
   }
 
   // [newArr addObject:[[%c(SettingsOptionSubPane) alloc] initWithTitle:@"Kik8 Options" iconImage:nil subPaneClass:%c(KESettingsViewController)]];
@@ -1006,7 +1017,7 @@ static inline UIColor *bubbleColor()
 %end
 
 %ctor {
-  if (((NSNumber *)getOptionForKey(@"kEnableNightMode", kGlobalUser)).boolValue)
+  if (((NSNumber *)getOptionForKey(kEnableNightMode, kGlobalUser)).boolValue)
   %init(NightMode);
 
   %init(_ungrouped)
