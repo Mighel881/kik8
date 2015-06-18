@@ -121,12 +121,40 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %end
 
+%hook HybridSmileyLabel
+
+- (void)setText:(NSString *)body
+{
+  if (body.length > 1024)
+  {
+    body = @"** SPAM DETECTED **";
+  }
+  %orig;
+}
+
+%end
+
+@interface KikMessage : NSObject
+@property(nonatomic) _Bool needsCellHeightRecalc;
+@end
+
 %hook KikMessage
 
 - (BOOL)isMarkedDeleted
 {
   if (GetPrefBool(@"kDelete")) return YES;
   return %orig;
+}
+
+// anti lag
+- (void)setBody:(NSString *)body
+{
+  if (body.length > 1024)
+  {
+    body = @"** SPAM DETECTED **";
+  }
+  self.needsCellHeightRecalc = YES;
+  %orig;
 }
 
 %end
