@@ -17,7 +17,7 @@ NSString *const kSquareTheme = @"$kik8_square_theme";
 NSString *const kFakeCamera = @"$kik8_fake_camera";
 NSString *const kDelete = @"$kik8_delete";
 NSString *const kTyping = @"$kik8_typing";
-NSString *const kWhiteBar = @"$kik8_White_bar";
+NSString *const kBlackBar = @"$kik8_black_bar";
 
 static NSObject *getOptionForKey(NSString *key, NSString *username)
 {
@@ -330,8 +330,8 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
   }
 
   //hide ugly border abox text box
-  if (((NSNumber *)getOptionForKey(kWhiteBar, kGlobalUser)).boolValue)
-    if (self.mediaBar.layer.sublayers[0]) ((CALayer *)self.mediaBar.layer.sublayers[0]).hidden = NO;
+  if (((NSNumber *)getOptionForKey(kBlackBar, kGlobalUser)).boolValue)
+    if (self.mediaBar.layer.sublayers[0]) ((CALayer *)self.mediaBar.layer.sublayers[0]).hidden = YES;
 }
 
 %new
@@ -1075,7 +1075,7 @@ static inline UIColor *bubbleColor()
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Mute ALL Chats" iconImage:nil optionKey:kMuted KEManager:self]];
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Timestamps" iconImage:nil optionKey:kDelete KEManager:self]];
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Leaving Chats Now Refresh's Them" iconImage:nil optionKey:kChatRefresh KEManager:self]];
-    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"White Border Around Text Box In Nightmode" iconImage:nil optionKey:kWhiteBar KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Black Border Around Textbox In Nightmode" iconImage:nil optionKey:kBlackBar KEManager:self]];
 
 
 
