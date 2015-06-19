@@ -290,6 +290,7 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 - (void)viewDidLayoutSubviews
 {
   %orig;
+
   if (!self._toggle)
   {
     // fake camera switch
@@ -298,6 +299,10 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
     self._toggle.onTintColor = bubbleColor();
     [self._toggle setOn:((NSNumber *)getOptionForKey(kFakeCamera, kGlobalUser)).boolValue animated:NO];
   }
+
+  //hide ugly border abox text box
+  if (((NSNumber *)getOptionForKey(kEnableNightMode, kGlobalUser)).boolValue)
+    if (self.mediaBar.layer.sublayers[0]) ((CALayer *)self.mediaBar.layer.sublayers[0]).hidden = YES;
 }
 
 %new
@@ -915,6 +920,7 @@ static inline UIColor *bubbleColor()
   {
     BOOL saveVal = self.toggle.isOn;
     [self.KEManager saveOption:@(saveVal) forKey:self.optionKey];
+    return;
   }
   %orig;
 }
