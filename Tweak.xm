@@ -1034,8 +1034,15 @@ static inline UIColor *bubbleColor()
   NSArray *newArr =
   @[
   [%c(SettingsOptionToggle) optionWithTitle:@"Disable Deliver Receipts" iconImage:nil optionKey:kDeliveredReceipts KEManager:self],
+  [[[%c(SettingsOptionLabel) alloc] initWithHeight:50 text:
+  @"Users who send you a message will see that the message sent but has not been delivered."] autorelease],
   [%c(SettingsOptionToggle) optionWithTitle:@"Disable Read Receipts" iconImage:nil optionKey:kReadReceipts KEManager:self],
+  [[[%c(SettingsOptionLabel) alloc] initWithHeight:90 text:
+  @"Users won't see that you have read their message, it shows up as a 'D' \n\n*TIP*(enable this and the first toggle to trick users into thinking you are logged out, it will always show up as an 'S')"] autorelease],
   [%c(SettingsOptionToggle) optionWithTitle:@"Disable is typing..." iconImage:nil optionKey:kTyping KEManager:self],
+  [[[%c(SettingsOptionLabel) alloc] initWithHeight:35 text:
+  @"Users will not know when you are typing a message."] autorelease]
+  ];
 
   NSMutableArray *mutableNewArr = [NSMutableArray arrayWithArray:newArr];
 
