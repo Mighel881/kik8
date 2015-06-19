@@ -929,6 +929,7 @@ static inline UIColor *bubbleColor()
 + (id)optionWithTitle:(id)arg1 iconImage:(id)arg2 optionKey:(NSString *)key KEManager:(KESettingsViewController *)KEManager
 {
   NSNumber *obj = (NSNumber *)[KEManager getOptionForKey:key];
+  if (!obj && [key isEqualToString:kUserDisabled]) obj = @YES;
   if (!obj) obj = @NO;
   SettingsOptionToggle *s = [[[%c(SettingsOptionToggle) alloc] initWithTitle:arg1 iconImage:arg2 on:[obj boolValue] executeOnToggle:NULL] autorelease];
   s.KEManager = KEManager;
@@ -943,6 +944,9 @@ static inline UIColor *bubbleColor()
 - (id)initWithTitle:(NSString *)arg1 iconImage:(UIImage *)arg2 executeOnTap:(void *)arg3;
 @end
 
+@interface SettingsOptionLabel :SettingsOptionBase
+- (id)initWithHeight:(double)arg1 text:(id)arg2;
+@end
 
 %subclass KESettingsViewController : SettingsPane
 
@@ -1020,9 +1024,9 @@ static inline UIColor *bubbleColor()
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Unlock All Smileys" iconImage:nil optionKey:kUnlockSmiley KEManager:self]];
 
     // Kill Kik
-    [mutableNewArr addObject:[[%c(SettingsOptionButton) alloc] initWithTitle:@"QUIT KIK" iconImage:nil executeOnTap:^(void){
+    [mutableNewArr addObject:[[[%c(SettingsOptionButton) alloc] initWithTitle:@"QUIT KIK" iconImage:nil executeOnTap:^(void){
       system("killall -9 Kik");
-    }]];
+    }] autorelease]];
   }
 
   // [newArr addObject:[[%c(SettingsOptionSubPane) alloc] initWithTitle:@"Kik8 Options" iconImage:nil subPaneClass:%c(KESettingsViewController)]];
