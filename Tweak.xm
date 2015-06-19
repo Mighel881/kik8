@@ -8,7 +8,8 @@ NSString *const kEnableNightMode = @"$kik8_enable_nightmode";
 NSString *const kDisableSmiley = @"$kik8_disable_smiley";
 NSString *const kUserDisabled = @"$kik8_user_disabled";
 NSString *const kUnlockSmiley = @"$kik8_unlock_smiley";
-NSString *const kMuted = @"$kik8_Muted";
+NSString *const kMuted = @"$kik8_muted";
+NSString *const kChatRefresh = @"$kik8_chat_refresh";
 NSString *const kDeliveredReceipts = @"$kik8_delivered_receipts";
 NSString *const kReadReceipts = @"$kik8_read_receipts";
 NSString *const kUnlimitedVideo = @"$kik8_unlimited_video";
@@ -16,6 +17,7 @@ NSString *const kSquareTheme = @"$kik8_square_theme";
 NSString *const kFakeCamera = @"$kik8_fake_camera";
 NSString *const kDelete = @"$kik8_delete";
 NSString *const kTyping = @"$kik8_typing";
+NSString *const kWhiteBar = @"$kik8_White_bar";
 
 static NSObject *getOptionForKey(NSString *key, NSString *username)
 {
@@ -241,6 +243,18 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %end
 
+%hook ChatManager
+
+- (void)leaveChat:(id)arg1 Silently:(BOOL)arg2 skipSave:(BOOL)arg3 {
+        if (((NSNumber *)getOptionForKey(kChatRefresh, kGlobalUser)).boolValue) {
+        arg2 = true;
+        arg3 = true;
+        return %orig(arg1,arg2,arg3);
+        }
+}
+
+%end
+
 %hook NetworkNotifier
 
 - (BOOL)isNetworkUnavailable
@@ -316,8 +330,8 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
   }
 
   //hide ugly border abox text box
-  if (((NSNumber *)getOptionForKey(kEnableNightMode, kGlobalUser)).boolValue)
-    if (self.mediaBar.layer.sublayers[0]) ((CALayer *)self.mediaBar.layer.sublayers[0]).hidden = YES;
+  if (((NSNumber *)getOptionForKey(kWhiteBar, kGlobalUser)).boolValue)
+    if (self.mediaBar.layer.sublayers[0]) ((CALayer *)self.mediaBar.layer.sublayers[0]).hidden = NO;
 }
 
 %new
@@ -1060,6 +1074,9 @@ static inline UIColor *bubbleColor()
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Unlock All Smileys" iconImage:nil optionKey:kUnlockSmiley KEManager:self]];
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Mute ALL Chats" iconImage:nil optionKey:kMuted KEManager:self]];
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Timestamps" iconImage:nil optionKey:kDelete KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Leaving Chats Now Refresh's Them" iconImage:nil optionKey:kChatRefresh KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"White Border Around Text Box In Nightmode" iconImage:nil optionKey:kWhiteBar KEManager:self]];
+
 
 
     // Kill Kik
