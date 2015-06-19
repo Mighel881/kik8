@@ -839,7 +839,12 @@ static inline UIColor *bubbleColor()
 
 // Settings
 
-@interface SettingsOptionToggle : NSObject
+@interface SettingsOptionBase : NSObject
+@property(nonatomic, retain) NSString *optionKey;
+@property(nonatomic, retain) KESettingsViewController *KEManager;
+@end
+
+@interface SettingsOptionToggle : SettingsOptionBase
 {
   UIImage *_iconImage;
   NSString *_title;
@@ -848,8 +853,6 @@ static inline UIColor *bubbleColor()
 
 @property(retain, nonatomic) UISwitch *toggle; // @synthesize toggle=_toggle;
 @property(copy, nonatomic) NSString *title; // @synthesize title=_title;
-@property(copy, nonatomic) NSString *optionKey; // @synthesize title=_title;
-@property(copy, nonatomic) KESettingsViewController *KEManager;
 @property(retain, nonatomic) UIImage *iconImage; // @synthesize iconImage=_iconImage;
 
 - (void)toggleValueChanged:(id)arg1;
@@ -876,13 +879,7 @@ static inline UIColor *bubbleColor()
 - (NSObject *)getOptionForKey:(NSString *)key;
 @end
 
-%hook SettingsOptionToggle
-
-- (void)toggleValueChanged:(id)arg1
-{
-  BOOL saveVal = self.toggle.isOn;
-  [self.KEManager saveOption:@(saveVal) forKey:self.optionKey];
-}
+%hook SettingsOptionBase
 
 %new
 - (NSString *)optionKey
@@ -908,6 +905,20 @@ static inline UIColor *bubbleColor()
   objc_setAssociatedObject(self, @selector(KEManager), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
+%end
+
+%hook SettingsOptionToggle
+
+- (void)toggleValueChanged:(id)arg1
+{
+  if (self.optionKey && self.KEManager)
+  {
+    BOOL saveVal = self.toggle.isOn;
+    [self.KEManager saveOption:@(saveVal) forKey:self.optionKey];
+  }
+  %orig;
+}
+
 %new
 + (id)optionWithTitle:(id)arg1 iconImage:(id)arg2 optionKey:(NSString *)key KEManager:(KESettingsViewController *)KEManager
 {
@@ -922,6 +933,9 @@ static inline UIColor *bubbleColor()
 
 %end
 
+@interface SettingsOptionButton : SettingsOptionBase
+- (id)initWithTitle:(NSString *)arg1 iconImage:(UIImage *)arg2 executeOnTap:(void *)arg3;
+@end
 
 
 %subclass KESettingsViewController : SettingsPane
@@ -998,6 +1012,11 @@ static inline UIColor *bubbleColor()
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Square Theme" iconImage:nil optionKey:kSquareTheme KEManager:self]];
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Disable Smiley Icons" iconImage:nil optionKey:kDisableSmiley KEManager:self]];
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Unlock All Smileys" iconImage:nil optionKey:kUnlockSmiley KEManager:self]];
+
+    // Kill Kik
+    [mutableNewArr addObject:[[%c(SettingsOptionButton) alloc] initWithTitle:@"QUIT KIK" iconImage:nil executeOnTap:^(void){
+      system("killall -9 Kik");
+    }]];
   }
 
   // [newArr addObject:[[%c(SettingsOptionSubPane) alloc] initWithTitle:@"Kik8 Options" iconImage:nil subPaneClass:%c(KESettingsViewController)]];
