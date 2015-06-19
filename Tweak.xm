@@ -8,6 +8,7 @@ NSString *const kEnableNightMode = @"$kik8_enable_nightmode";
 NSString *const kDisableSmiley = @"$kik8_disable_smiley";
 NSString *const kUserDisabled = @"$kik8_user_disabled";
 NSString *const kUnlockSmiley = @"$kik8_unlock_smiley";
+NSString *const kMuted = @"$kik8_Muted";
 NSString *const kDeliveredReceipts = @"$kik8_delivered_receipts";
 NSString *const kReadReceipts = @"$kik8_read_receipts";
 NSString *const kUnlimitedVideo = @"$kik8_unlimited_video";
@@ -163,6 +164,20 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 
 %end
 
+%hook KikChat
+
+- (BOOL)isMuted
+{
+  if (((NSNumber *)getOptionForKey(kMuted, kGlobalUser)).boolValue) return YES;
+  return %orig;
+}
+
+- (BOOL)isMutedForever
+{
+  return YES;
+}
+
+%end
 
 %hook KikParsedMessage
 
@@ -409,6 +424,15 @@ static UIImage *colorImageWithColor(UIImage *image, UIColor *color)
 {
   if (self.cell.message.body.length >= 2048) return NO;
   else return %orig;
+}
+
+%end
+
+%hook MediaContentSendMessage
+
+-(void)hideSmileyPopup
+{
+
 }
 
 %end
@@ -1010,15 +1034,8 @@ static inline UIColor *bubbleColor()
   NSArray *newArr =
   @[
   [%c(SettingsOptionToggle) optionWithTitle:@"Disable Deliver Receipts" iconImage:nil optionKey:kDeliveredReceipts KEManager:self],
-  [[[%c(SettingsOptionLabel) alloc] initWithHeight:50 text:
-  @"Users who send you a message will see that the message sent but has not been delivered."] autorelease],
   [%c(SettingsOptionToggle) optionWithTitle:@"Disable Read Receipts" iconImage:nil optionKey:kReadReceipts KEManager:self],
-  [[[%c(SettingsOptionLabel) alloc] initWithHeight:90 text:
-  @"Users won't see that you have read their message, it shows up as a 'D' \n\n*TIP*(enable this and the first toggle to trick users into thinking you are logged out, it will always show up as an 'S')"] autorelease],
   [%c(SettingsOptionToggle) optionWithTitle:@"Disable is typing..." iconImage:nil optionKey:kTyping KEManager:self],
-  [[[%c(SettingsOptionLabel) alloc] initWithHeight:35 text:
-  @"Users will not know when you are typing a message."] autorelease]
-  ];
 
   NSMutableArray *mutableNewArr = [NSMutableArray arrayWithArray:newArr];
 
@@ -1034,6 +1051,9 @@ static inline UIColor *bubbleColor()
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Square Theme" iconImage:nil optionKey:kSquareTheme KEManager:self]];
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Disable Smiley Icons" iconImage:nil optionKey:kDisableSmiley KEManager:self]];
     [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Unlock All Smileys" iconImage:nil optionKey:kUnlockSmiley KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Mute ALL Chats" iconImage:nil optionKey:kMuted KEManager:self]];
+    [mutableNewArr addObject:[%c(SettingsOptionToggle) optionWithTitle:@"Enable Timestamps" iconImage:nil optionKey:kDelete KEManager:self]];
+
 
     // Kill Kik
     [mutableNewArr addObject:[[[%c(SettingsOptionButton) alloc] initWithTitle:@"QUIT KIK" iconImage:nil executeOnTap:^(void){
